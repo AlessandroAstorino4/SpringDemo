@@ -3,6 +3,8 @@ package com.lova2code.springboot.cruddemo.service;
 import com.lova2code.springboot.cruddemo.dao.CardRepository;
 import com.lova2code.springboot.cruddemo.entity.Card;
 import com.lova2code.springboot.cruddemo.entity.CodeGenerator;
+import com.lova2code.springboot.cruddemo.exception.CardNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class CardServiceImpl implements CardService {
 
     private CardRepository cardRepository;
@@ -36,14 +39,18 @@ public class CardServiceImpl implements CardService {
         Card theCard = null;
 
         if (result.isPresent()) {
+            log.info("Card found in repo");
             theCard = result.get();
             if (theCard.isEnabled()) {
+                log.info("Card Enabled");
                 return theCard;
             } else {
-                throw new RuntimeException("Card found but is disabled with token: " + theToken);
+                log.error("Card Disabled");
+                throw new CardNotFoundException("Card found but is disabled with token: " + theToken);
             }
         } else {
-            throw new RuntimeException("Did not find card token: " + theToken);
+            log.error("Card not found in repo");
+            throw new CardNotFoundException("Did not find card token: " + theToken);
         }
     }
 
