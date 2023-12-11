@@ -4,6 +4,10 @@ import com.lova2code.springboot.cruddemo.entity.Card;
 import com.lova2code.springboot.cruddemo.entity.ResponseStatus;
 import com.lova2code.springboot.cruddemo.exception.CardNotFoundException;
 import com.lova2code.springboot.cruddemo.service.CardService;
+import com.lova2code.springboot.cruddemo.service.Microservice;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +18,24 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+//@RequestMapping("/api")
 @Slf4j
 @RequiredArgsConstructor
 public class CardRestController {
 
     private final CardService cardService;
 
+    private final Microservice microservice;
+
     @GetMapping("/cards")
+    @Operation(summary = "Display all cards in repository", description = "Endpoint to obtain the cards list")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cards list obtain with success"),
+            @ApiResponse(responseCode = "204", description = "Cards list empty")
+    })
     public ResponseEntity<List<Card>> findAll() {
         log.info("Display all cards");
+        log.warn("Context: " + microservice.getContextPath());
         List<Card> cards = cardService.findAll();
 
         if (cards.isEmpty()) {
@@ -34,6 +46,10 @@ public class CardRestController {
     }
 
     @GetMapping("/cards/{cardToken}")
+    @Operation(summary = "Display info for the selected card", description = "Endpoint to obtain the info for the selected card")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Card info obtained with success")
+    })
     public ResponseEntity<Card> readCard(@PathVariable String cardToken) {
         return new ResponseEntity<>(cardService.readCard(cardToken), HttpStatus.OK);
     }
