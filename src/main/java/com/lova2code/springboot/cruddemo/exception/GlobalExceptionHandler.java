@@ -12,4 +12,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCardNotFoundException(CardNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    public ResponseEntity<String> handleCardDisabledException(CardDisabledException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

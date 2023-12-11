@@ -3,6 +3,7 @@ package com.lova2code.springboot.cruddemo.service;
 import com.lova2code.springboot.cruddemo.dao.CardRepository;
 import com.lova2code.springboot.cruddemo.entity.Card;
 import com.lova2code.springboot.cruddemo.entity.CodeGenerator;
+import com.lova2code.springboot.cruddemo.exception.CardDisabledException;
 import com.lova2code.springboot.cruddemo.exception.CardNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +46,14 @@ public class CardServiceImpl implements CardService {
                 log.info("Card Enabled");
                 return theCard;
             } else {
-                log.error("Card Disabled");
+                log.warn("Card Disabled");
                 throw new CardNotFoundException("Card found but is disabled with token: " + theToken);
             }
         } else {
-            log.error("Card not found in repo");
+            log.error("Card not found in repository");
             throw new CardNotFoundException("Did not find card token: " + theToken);
         }
     }
-
 
     @Override
     public boolean viewStatus(String theToken) {
@@ -61,9 +61,11 @@ public class CardServiceImpl implements CardService {
         Card theCard = null;
 
         if (res.isPresent()) {
+            log.info("Getting card info");
             theCard = res.get();
         } else {
-            throw new RuntimeException("Did not find card token: " + theToken);
+            log.error("Card not found in repository");
+            throw new CardNotFoundException("Did not find card token: " + theToken);
         }
         return theCard.isEnabled();
     }
@@ -74,10 +76,13 @@ public class CardServiceImpl implements CardService {
         List<Card> allCards = cardRepository.findAll();
         for (Card c : allCards) {
             if (card.getPan().equals(c.getPan()) && !(c.isEnabled())) {
+                log.info("Card alreay present in repo. Update status");
                 c.setEnabled(true);
                 return cardRepository.save(c);
             }
         }
+        log.info("Generate card token...");
+        log.info("Card insert in repo");
         card.setToken(codeGenerator.generateRandomAlphaNumericString(16));
         return cardRepository.save(card);
     }
@@ -89,16 +94,20 @@ public class CardServiceImpl implements CardService {
         Card theCard = null;
 
         if (res.isPresent()) {
+            log.info("Card found");
             theCard = res.get();
             if (theCard.isEnabled()) {
+                log.info("Card Enabled");
                 theCard.setExpire(card.getExpire());
                 theCard.setCvv(card.getCvv());
                 return cardRepository.save(theCard);
             } else {
-                throw new RuntimeException("Could not perform update for card token: " + theToken + "|| Card disabled.");
+                log.warn("Card disabled");
+                throw new CardDisabledException("Could not perform update for card token: " + theToken + "|| Card disabled.");
             }
         } else {
-            throw new RuntimeException("Could not perform update for card token: " + theToken);
+            log.error("Card not found");
+            throw new CardNotFoundException("Could not perform update for card token: " + theToken);
         }
 
     }
@@ -111,9 +120,11 @@ public class CardServiceImpl implements CardService {
 
         if (card.isPresent()) {
             theCard = card.get();
+            log.info("Card found");
             cardRepository.deleteById(theToken);
         } else {
-            throw new RuntimeException("Did not find card token: " + theToken);
+            log.error("Card not found in repo");
+            throw new CardNotFoundException("Did not find card token: " + theToken);
         }
     }
 
@@ -126,9 +137,11 @@ public class CardServiceImpl implements CardService {
         if (card.isPresent()) {
             theCard = card.get();
             theCard.setEnabled(false);
+            log.warn("Setting card status disabled");
             cardRepository.save(theCard);
         } else {
-            throw new RuntimeException("Did not find card token: " + cardToken);
+            log.error("Card not found in repo");
+            throw new CardNotFoundException("Did not find card token: " + cardToken);
         }
     }
 }
