@@ -27,19 +27,12 @@ public class CardServiceImpl implements CardService {
 
 
     @Override
-    public ResponseEntity<List<Card>> findAll() {
-
-        List<Card> cards = cardRepository.findAll();
-
-        if (cards.isEmpty()) {
-            log.warn("No card in repo");
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(cards, HttpStatus.OK);
+    public List<Card> findAll() {
+        return cardRepository.findAll();
     }
 
     @Override
-    public ResponseEntity<Card> readCard(String theToken) {
+    public Card readCard(String theToken) {
 
         Optional<Card> result = cardRepository.findById(theToken);
 
@@ -48,7 +41,7 @@ public class CardServiceImpl implements CardService {
             Card theCard = result.get();
             if (theCard.isEnabled()) {
                 log.info("Card Enabled");
-                return new ResponseEntity<>(theCard, HttpStatus.OK);
+                return theCard;
             } else {
                 log.warn("Card Disabled");
                 throw new CardDisabledException("Card found but is disabled");

@@ -1,10 +1,13 @@
 package com.lova2code.springboot.cruddemo.rest;
 
 import com.lova2code.springboot.cruddemo.entity.Card;
+import com.lova2code.springboot.cruddemo.entity.ResponseStatus;
 import com.lova2code.springboot.cruddemo.exception.CardNotFoundException;
 import com.lova2code.springboot.cruddemo.service.CardService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,47 +16,49 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @Slf4j
+@RequiredArgsConstructor
 public class CardRestController {
 
-    private CardService cardService;
-
-
-    @Autowired
-    public CardRestController(CardService cardService) {
-        this.cardService = cardService;
-    }
+    private final CardService cardService;
 
     @GetMapping("/cards")
     public ResponseEntity<List<Card>> findAll() {
         log.info("Display all cards");
-        return cardService.findAll();
+        List<Card> cards = cardService.findAll();
+
+        if (cards.isEmpty()) {
+            log.warn("No card in repo");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(cards, HttpStatus.OK);
     }
 
     @GetMapping("/cards/{cardToken}")
     public ResponseEntity<Card> readCard(@PathVariable String cardToken) {
-        return cardService.readCard(cardToken);
+        return new ResponseEntity<>(cardService.readCard(cardToken), HttpStatus.OK);
     }
 
     @GetMapping("/cards/status/{cardToken}")
-    public String viewStatus(@PathVariable String cardToken) {
+    public ResponseEntity<ResponseStatus> viewStatus(@PathVariable String cardToken) {
         boolean tmp = cardService.viewStatus(cardToken);
-        String stat = "DISABLED";
+        ResponseStatus responseStatus = new ResponseStatus();
+        responseStatus.setEnabled(false);
         if (tmp) {
-            stat = "ENABLED";
+            responseStatus.setEnabled(true);
         }
-        return "Card token: " + cardToken + " has status: " + stat;
+        return new ResponseEntity<>(responseStatus, HttpStatus.OK);
     }
 
     @PostMapping("/cards")
-    public String addCard(@RequestBody Card card) {
+    public ResponseEntity<Card> addCard(@RequestBody Card card) {
         Card theCard = cardService.save(card);
-        return theCard.getToken();
+        return new ResponseEntity<>(theCard, HttpStatus.OK);
     }
 
     @PutMapping ("/cards/{cardToken}")
-    public String updateCard(@RequestBody Card card, @PathVariable String cardToken) {
+    public ResponseEntity<Card> updateCard(@RequestBody Card card, @PathVariable String cardToken) {
         Card theCard = cardService.update(card, cardToken);
-        return theCard.getToken();
+        return new ResponseEntity<>(theCard, HttpStatus.OK);
     }
 
     @DeleteMapping("/cards/{cardToken}")

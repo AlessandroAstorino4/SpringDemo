@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface CardService {
 
-    ResponseEntity<List<Card>> findAll();
+    List<Card> findAll();
 
-    ResponseEntity<Card> readCard(String theToken);
+    Card readCard(String theToken);
 
     boolean viewStatus(String theToken);
 
