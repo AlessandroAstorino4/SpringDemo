@@ -5,6 +5,7 @@ import com.lova2code.springboot.cruddemo.exception.CardNotFoundException;
 import com.lova2code.springboot.cruddemo.service.CardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,15 +24,14 @@ public class CardRestController {
     }
 
     @GetMapping("/cards")
-    public List<Card> findAll() {
+    public ResponseEntity<List<Card>> findAll() {
         log.info("Display all cards");
         return cardService.findAll();
     }
 
     @GetMapping("/cards/{cardToken}")
-    public Card readCard(@PathVariable String cardToken) {
-        Card card =  cardService.readCard(cardToken);
-        return card;
+    public ResponseEntity<Card> readCard(@PathVariable String cardToken) {
+        return cardService.readCard(cardToken);
     }
 
     @GetMapping("/cards/status/{cardToken}")

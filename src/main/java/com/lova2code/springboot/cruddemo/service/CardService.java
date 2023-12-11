@@ -1,14 +1,15 @@
 package com.lova2code.springboot.cruddemo.service;
 
 import com.lova2code.springboot.cruddemo.entity.Card;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface CardService {
 
-    List<Card> findAll();
+    ResponseEntity<List<Card>> findAll();
 
-    Card readCard(String theToken);
+    ResponseEntity<Card> readCard(String theToken);
 
     boolean viewStatus(String theToken);
 

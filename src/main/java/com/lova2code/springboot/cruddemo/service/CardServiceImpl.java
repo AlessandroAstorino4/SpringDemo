@@ -5,8 +5,11 @@ import com.lova2code.springboot.cruddemo.entity.Card;
 import com.lova2code.springboot.cruddemo.entity.CodeGenerator;
 import com.lova2code.springboot.cruddemo.exception.CardDisabledException;
 import com.lova2code.springboot.cruddemo.exception.CardNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,43 +18,44 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CardServiceImpl implements CardService {
 
-    private CardRepository cardRepository;
+    private final CardRepository cardRepository;
 
-    private CodeGenerator codeGenerator;
+    private final CodeGenerator codeGenerator;
 
-    @Autowired
-    public CardServiceImpl(CardRepository cardRepository, CodeGenerator codeGenerator) {
 
-        this.cardRepository = cardRepository;
-        this.codeGenerator = codeGenerator;
+    @Override
+    public ResponseEntity<List<Card>> findAll() {
+
+        List<Card> cards = cardRepository.findAll();
+
+        if (cards.isEmpty()) {
+            log.warn("No card in repo");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(cards, HttpStatus.OK);
     }
 
     @Override
-    public List<Card> findAll() {
+    public ResponseEntity<Card> readCard(String theToken) {
 
-        return cardRepository.findAll();
-    }
-
-    @Override
-    public Card readCard(String theToken) {
         Optional<Card> result = cardRepository.findById(theToken);
-        Card theCard = null;
 
         if (result.isPresent()) {
             log.info("Card found in repo");
-            theCard = result.get();
+            Card theCard = result.get();
             if (theCard.isEnabled()) {
                 log.info("Card Enabled");
-                return theCard;
+                return new ResponseEntity<>(theCard, HttpStatus.OK);
             } else {
                 log.warn("Card Disabled");
-                throw new CardNotFoundException("Card found but is disabled with token: " + theToken);
+                throw new CardDisabledException("Card found but is disabled");
             }
         } else {
             log.error("Card not found in repository");
-            throw new CardNotFoundException("Did not find card token: " + theToken);
+            throw new CardNotFoundException("Card not found");
         }
     }
 
