@@ -2,15 +2,13 @@ package com.lova2code.springboot.cruddemo.rest;
 
 import com.lova2code.springboot.cruddemo.entity.Card;
 import com.lova2code.springboot.cruddemo.entity.ResponseStatus;
-import com.lova2code.springboot.cruddemo.exception.CardNotFoundException;
 import com.lova2code.springboot.cruddemo.service.CardService;
-import com.lova2code.springboot.cruddemo.service.Microservice;
+import com.lova2code.springboot.cruddemo.service.MicroserviceProperties;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +23,7 @@ public class CardRestController {
 
     private final CardService cardService;
 
-    private final Microservice microservice;
+    private final MicroserviceProperties microservice;
 
     @GetMapping("/cards")
     @Operation(summary = "Display all cards in repository", description = "Endpoint to obtain the cards list")
@@ -34,49 +32,41 @@ public class CardRestController {
             @ApiResponse(responseCode = "204", description = "Cards list empty")
     })
     public ResponseEntity<List<Card>> findAll() {
-        log.info("Display all cards");
-        log.warn("Context: " + microservice.getContextPath());
-        List<Card> cards = cardService.findAll();
-
-        if (cards.isEmpty()) {
-            log.warn("No card in repo");
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(cards, HttpStatus.OK);
+        return cardService.findAll();
     }
 
     @GetMapping("/cards/{cardToken}")
     @Operation(summary = "Display info for the selected card", description = "Endpoint to obtain the info for the selected card")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Card info obtained with success")
+            @ApiResponse(responseCode = "200", description = "Card info obtained with success"),
+            @ApiResponse(responseCode = "404", description = "Card not found in repo"),
+            @ApiResponse(responseCode = "400", description = "Card found but is disabled")
     })
     public ResponseEntity<Card> readCard(@PathVariable String cardToken) {
-        return new ResponseEntity<>(cardService.readCard(cardToken), HttpStatus.OK);
+        return cardService.readCard(cardToken);
     }
 
     @GetMapping("/cards/status/{cardToken}")
     public ResponseEntity<ResponseStatus> viewStatus(@PathVariable String cardToken) {
-        boolean tmp = cardService.viewStatus(cardToken);
-        ResponseStatus responseStatus = new ResponseStatus();
-        responseStatus.setEnabled(false);
-        if (tmp) {
-            responseStatus.setEnabled(true);
-        }
-        return new ResponseEntity<>(responseStatus, HttpStatus.OK);
+        return cardService.viewStatus(cardToken);
     }
 
     @PostMapping("/cards")
     public ResponseEntity<Card> addCard(@RequestBody Card card) {
-        Card theCard = cardService.save(card);
-        return new ResponseEntity<>(theCard, HttpStatus.OK);
+        return cardService.save(card);
     }
 
     @PutMapping ("/cards/{cardToken}")
     public ResponseEntity<Card> updateCard(@RequestBody Card card, @PathVariable String cardToken) {
-        Card theCard = cardService.update(card, cardToken);
-        return new ResponseEntity<>(theCard, HttpStatus.OK);
+        return  cardService.update(card, cardToken);
     }
 
+    @DeleteMapping("/cards/{cardToken}")
+    public ResponseEntity<Card> delete(@PathVariable String cardToken, @RequestParam boolean forced) {
+        return cardService.delete(cardToken, forced);
+    }
+
+    /*
     @DeleteMapping("/cards/{cardToken}")
     public void deleteById(@PathVariable String cardToken, @RequestParam boolean forced) {
         if (forced) {
@@ -86,5 +76,8 @@ public class CardRestController {
         }
 
     }
+     */
+
+
 
 }

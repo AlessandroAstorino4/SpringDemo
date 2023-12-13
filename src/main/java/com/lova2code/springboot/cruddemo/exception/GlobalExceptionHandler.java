@@ -17,4 +17,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCardDisabledException(CardDisabledException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(CardsListEmptyException.class)
+    public ResponseEntity<String> handleCardsListEmptyException(CardsListEmptyException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NO_CONTENT);
+    }
 }

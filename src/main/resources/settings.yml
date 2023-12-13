@@ -2,6 +2,8 @@ server:
   servlet:
     context-path: /api
 
+backend-path: https://swapi.dev/api/people/1
+
 spring:
   datasource:
     url: jdbc:h2:mem:testdb

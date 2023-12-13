@@ -1,23 +1,26 @@
 package com.lova2code.springboot.cruddemo.service;
 
 import com.lova2code.springboot.cruddemo.entity.Card;
+import com.lova2code.springboot.cruddemo.entity.ResponseStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface CardService {
 
-    List<Card> findAll();
+    ResponseEntity<List<Card>> findAll();
 
-    Card readCard(String theToken);
+    ResponseEntity<Card> readCard(String theToken);
 
-    boolean viewStatus(String theToken);
+    ResponseEntity<ResponseStatus> viewStatus(String theToken);
 
-    Card save(Card card);
+    ResponseEntity<Card> save(Card card);
 
-    Card update(Card card, String theToken);
+    ResponseEntity<Card> update(Card card, String theToken);
 
-    void deleteById(String theToken);
+    ResponseEntity<Card> deleteById(String theToken);
 
-    void disable(String cardToken);
+    ResponseEntity<Card> disable(String cardToken);
+
+    ResponseEntity<Card> delete(String cardToken, boolean forced);
 }
