@@ -23,8 +23,6 @@ public class CardRestController {
 
     private final CardService cardService;
 
-    private final MicroserviceProperties microservice;
-
     @GetMapping("/cards")
     @Operation(summary = "Display all cards in repository", description = "Endpoint to obtain the cards list")
     @ApiResponses(value = {
