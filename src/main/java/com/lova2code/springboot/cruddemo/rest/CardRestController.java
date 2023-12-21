@@ -56,9 +56,7 @@ public class CardRestController {
 
     @PostMapping("/cards")
     @Operation(summary = "Add a card to the repo", description = "Endpoint to add a card to the repo")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Card has been added to the repo")
-    })
+    @ApiResponses(value = @ApiResponse(responseCode = "200", description = "Card has been added to the repo"))
     public ResponseEntity<Card> addCard(@RequestBody Card card) {
         return cardService.save(card);
     }
